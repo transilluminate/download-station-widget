@@ -131,7 +131,7 @@ function processDownloadTasks(data) {
 		task.speedUpload = data[i].additional.transfer.speed_upload;
 		task.speedUploadHuman = humanFileSize( task.speedUpload ) + '/s';
 		
-	    if (task.size > 0) { // avoid divide by 0 (if download is pending)
+		if (task.size > 0) { // avoid divide by 0 (if download is pending)
 			task.percentComplete = ((task.downloaded / task.size) * 100).toFixed(1);
 		}
 		else {
