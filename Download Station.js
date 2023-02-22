@@ -155,10 +155,10 @@ function createWidget(data,widgetSize) {
  	
 		let displayDownloads;
 		
-		if (widgetSize = 'large') {
+		if (widgetSize == 'large') {
 			displayDownloads = 6;
 		}
-		else if (widgetSize = 'medium') {
+		else if (widgetSize == 'medium') {
 			displayDownloads = 2;
 		}
  	
