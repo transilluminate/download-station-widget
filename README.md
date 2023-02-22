@@ -22,6 +22,4 @@ file into your Scriptable iCloud folder, either find it in Finder, or use the fi
 
 ## Examples
 
-![Large](https://raw.githubusercontent.com/transilluminate/download-station-widget/main/large.png "Large")
-![Medium](https://raw.githubusercontent.com/transilluminate/download-station-widget/main/medium.png "Medium")
-![Small](https://raw.githubusercontent.com/transilluminate/download-station-widget/main/small.png "Small")
+![Screenshot](https://raw.githubusercontent.com/transilluminate/download-station-widget/main/screenshot.png "Screenshot")
