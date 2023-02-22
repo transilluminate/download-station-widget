@@ -18,7 +18,7 @@ const password = "";
 // set your Download Station server URL
 // default = "http://synology:5000"
 // (note: you can use a Tailscale mesh network to make this seamless)
-const server = "http://diskstation:5000"; 
+const server = "http://diskstation:5000";
 
 // Can set the widget on-click action to open the Download Station (optional)
 // Set the "When interacting" option on the widget to be:
@@ -58,9 +58,9 @@ async function getServerInfo() {
 	return await serverRequest(url);
 }
 
-async function getSessionID() { 
+async function getSessionID() {
 	const path = "/webapi/" + serverInfo.data["SYNO.API.Auth"].path;
-	const url = server + path + 
+	const url = server + path +
 		"?" + "api=SYNO.API.Auth" +
 		"&" + "version=3" +
 		"&" + "method=login" +
@@ -74,7 +74,7 @@ async function getSessionID() {
 
 async function getDownloads() {
 	const path = "/webapi/" + serverInfo.data["SYNO.DownloadStation.Task"].path;
-	const url = server + path + 
+	const url = server + path +
 		"?" + "api=SYNO.DownloadStation.Task" +
 		"&" + "version=1" +
 		"&" + "method=list" +
@@ -85,7 +85,7 @@ async function getDownloads() {
 
 async function addDownload(uri) {
 	const path = "/webapi/" + serverInfo.data["SYNO.DownloadStation.Task"].path;
-	const url = server + path + 
+	const url = server + path +
 		"?" + "api=SYNO.DownloadStation.Task" +
 		"&" + "version=2" +
 		"&" + "method=create" +
@@ -99,8 +99,8 @@ async function addDownload(uri) {
 function humanFileSize(bytes, si=true, dp=1) {
 	const thresh = si ? 1000 : 1024;
 	if (Math.abs(bytes) < thresh) { return bytes + ' B'; }
-	const units = si 
-		? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
+	const units = si
+		? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 		: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
 	let u = -1;
 	const r = 10**dp;
@@ -161,7 +161,7 @@ function createWidget(data,widgetSize) {
 		}
 		else if (widgetSize = 'medium') {
 			displayDownloads = 2;
-		} 		
+		}
  	
 		// sort by percent completed % descending
 		data.sort((a, b) => { return b.percentComplete - a.percentComplete; });
@@ -209,7 +209,7 @@ function createWidget(data,widgetSize) {
 
 		verticalStack.addSpacer();
   
-			let footerStack = verticalStack.addStack(); 
+			let footerStack = verticalStack.addStack();
       
 			let infoText = `Total number of tasks: ${numberOfDownloads}`;
 			let infoElement = footerStack.addText(infoText);
@@ -310,18 +310,21 @@ function createWidget(data,widgetSize) {
 		value4.font = Font.mediumSystemFont(14);
 		value4.textColor = Color.blue();
 		
-		return widget; 	
+		return widget;
 	}
 }
 
 function displayNotification(title,subtitle,body) {
 	let n = new Notification();
-	n.removeAllDelivered();
 	n.title = title;
 	n.subtitle = subtitle;
 	n.body = body;
 	n.schedule();
-}  
+}
+
+// populate variables
+serverInfo = await getServerInfo();
+sessionID = await getSessionID();
 
 // called from share sheet
 if (args.urls[0]) {
@@ -336,10 +339,6 @@ if (args.urls[0]) {
 }
 
 // main
-
-serverInfo = await getServerInfo();
-sessionID = await getSessionID();
-
 if (config.runsInWidget) {
 
 	widgetSize = config.widgetFamily;
