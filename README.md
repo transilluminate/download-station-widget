@@ -3,6 +3,8 @@
 Simple iOS widget using [Scriptable.app](https://scriptable.app/) to display the status of the downloads on the
 [Synology](https://synology.com/) [Download Station](https://www.synology.com/en-us/dsm/packages/DownloadStation).
 
+Accepts links from sharesheets to upload to the Download Station.
+
 Can be set up to work from anywhere using [Tailscale](https://tailscale.com/synology/).
 
 ## Installation
