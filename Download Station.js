@@ -125,7 +125,7 @@ function processDownloadTasks(data) {
 		task.size = data[i].size;
 		task.sizeHuman = humanFileSize( task.size );
 		task.downloaded = data[i].additional.transfer.size_downloaded;
-    	task.downloadedHuman = humanFileSize( task.downloaded );
+		task.downloadedHuman = humanFileSize( task.downloaded );
 		task.speedDownload = data[i].additional.transfer.speed_download;
 		task.speedDownloadHuman = humanFileSize( task.speedDownload ) + '/s';
 		task.speedUpload = data[i].additional.transfer.speed_upload;
@@ -205,7 +205,6 @@ function createWidget(data,widgetSize) {
 				subtitleElement.textColor = Color.gray();
  	
 				verticalStack.addSpacer(10);
-
 			}
 
 		verticalStack.addSpacer();
