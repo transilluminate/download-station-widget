@@ -321,48 +321,52 @@ function displayNotification(title,subtitle,body) {
 	n.schedule();
 }
 
-// populate variables
-serverInfo = await getServerInfo();
-sessionID = await getSessionID();
+if (username && password) {
 
-// called from share sheet
-if (args.urls[0]) {
-	let url = args.urls[0];
-	let serverResponse = await addDownload(url);
-	if (serverResponse.success == true) {
-		displayNotification('Download Station','Success!',`\nAdded: ${url}`);
+	// populate variables
+	serverInfo = await getServerInfo();
+	sessionID = await getSessionID();
+
+	// called from share sheet
+	if (args.urls[0]) {
+		let url = args.urls[0];
+		let serverResponse = await addDownload(url);
+		if (serverResponse.success == true) {
+			displayNotification('Download Station','Success!',`\nAdded: ${url}`);
+		}
+		else {
+			displayNotification('Download Station','Failure!',`\nError: ${serverResponse}`);
+		}
 	}
-	else {
-		displayNotification('Download Station','Failure!',`\nError: ${serverResponse}`);
+
+	// main
+	if (config.runsInWidget) {
+
+		widgetSize = config.widgetFamily;
+		let rawJSON = await getDownloads();
+		numberOfDownloads = rawJSON.data.total;
+
+		let formattedJSON = processDownloadTasks(rawJSON.data.tasks);
+		let widget = createWidget(formattedJSON,widgetSize);
+  
+		Script.setWidget(widget);
+	}
+	else { // test in the app
+
+		widgetSize = 'large';
+		let rawJSON = await getDownloads();
+		numberOfDownloads = rawJSON.data.total;
+	
+		let formattedJSON = processDownloadTasks(rawJSON.data.tasks);
+		let widget = createWidget(formattedJSON,widgetSize);
+
+		if      (widgetSize == 'large')  { widget.presentLarge();  }
+		else if (widgetSize == 'medium') { widget.presentMedium(); }
+		else if (widgetSize == 'small')  { widget.presentSmall();  };
 	}
 }
-
-// main
-if (config.runsInWidget) {
-
-	widgetSize = config.widgetFamily;
-  
-	let rawJSON = await getDownloads();
-	numberOfDownloads = rawJSON.data.total;
-
-	let formattedJSON = processDownloadTasks(rawJSON.data.tasks);
-	let widget = createWidget(formattedJSON,widgetSize);
-  
-	Script.setWidget(widget);
-	
-}
-else { // test in the app
-
-	widgetSize = 'large';
-	
-	let rawJSON = await getDownloads();
-	numberOfDownloads = rawJSON.data.total;
-	
-	let formattedJSON = processDownloadTasks(rawJSON.data.tasks);
-	let widget = createWidget(formattedJSON,widgetSize);
-
-	if      (widgetSize == 'large')  { widget.presentLarge();  }
-	else if (widgetSize == 'medium') { widget.presentMedium(); }
-	else if (widgetSize == 'small')  { widget.presentSmall();  };
+else {
+	// no login credentials!
+	displayNotification("Download Station.js Script Error","","No username or password set!");
 }
 Script.complete();
