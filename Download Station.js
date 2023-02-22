@@ -20,7 +20,7 @@ const password = "";
 // (note: you can use a Tailscale mesh network to make this seamless)
 const server = "http://diskstation:5000"; 
 
-// Can set the widget on-clock action to open the Download Station (optional)
+// Can set the widget on-click action to open the Download Station (optional)
 // Set the "When interacting" option on the widget to be:
 // "Open URL": https://synology-fqdn.node123.ts.net:8001/index.cgi?launchApp=SYNO.SDS.DownloadStation.Application
 // (note: has to be a full qualified domain name with a valid https certificate to be a fully smooth experience)
