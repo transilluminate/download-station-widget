@@ -156,10 +156,10 @@ function createWidget(data,widgetSize) {
 		let displayDownloads;
 		
 		if (widgetSize == 'large') {
-			displayDownloads == 6;
+			displayDownloads = 6;
 		}
 		else if (widgetSize == 'medium') {
-			displayDownloads == 2;
+			displayDownloads = 2;
 		}
  	
 		// sort by percent completed % descending
