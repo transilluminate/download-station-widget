@@ -113,11 +113,10 @@ function humanFileSize(bytes, si=true, dp=1) {
 
 function processDownloadTasks(data) {
 	let tasks = [];
-	let task = {};
 	const truncate = 40; // default truncate at = 40
 	
 	for (const i in data) {
-
+		let task = {};
 		task.id = data[i].id
 		task.title = data[i].title;
 		task.shortTitle = (data[i].title.length > truncate) ? data[i].title.slice(0,truncate-1) + '…' : data[i].title;
