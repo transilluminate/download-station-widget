@@ -17,8 +17,8 @@ file into your Scriptable iCloud folder, either find it in Finder, or use the fi
 
 ## On-Click action
 
-- in Scriptable: can set the widget on-click action to open the Download Station (optional)
-- open script settings, set the "When interacting" option on the widget to be "Open URL": `https://synology-fqdn.node123.ts.net:8001/index.cgi?launchApp=SYNO.SDS.DownloadStation.Application`
+- when configuring the widget, can set the on-click action to open the Download Station (optional)
+- set the "When interacting" option on the widget to be "Open URL": `https://synology-fqdn.node123.ts.net:8001/index.cgi?launchApp=SYNO.SDS.DownloadStation.Application`
 - (note: has to be a full qualified domain name with a valid https certificate to be a fully smooth experience)
 
 ## Examples
