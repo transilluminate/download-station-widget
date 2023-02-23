@@ -12,7 +12,7 @@ Can be set up to work from anywhere using [Tailscale](https://tailscale.com/syno
 - requires the [Scriptable iOS app](https://scriptable.app/)
 - place the [Download Station.js](https://raw.githubusercontent.com/transilluminate/download-station-widget/main/Download%20Station.js)
 file into your Scriptable iCloud folder, either find it in Finder, or use the file path
-`~/Library/Mobile Documents/iCloud~dk~simonbs~Scriptable/Documents` (ory use the `copy_to_iCloud.sh` script)
+`~/Library/Mobile Documents/iCloud~dk~simonbs~Scriptable/Documents` (or use the `copy_to_iCloud.sh` script)
 - edit the script to change you `username`, `password` and `server` details
 
 ## On-Click action
