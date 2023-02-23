@@ -56,7 +56,7 @@ async function getDownloads() {
 }
 
 async function addDownload(uri) {
-	console.log("addDownload()");
+	console.log(`addDownload(${uri})`);
 	const api = "SYNO.DownloadStation.Task";
 	const path = "/webapi/" + serverInfo.data[api].path;
 	const url = server + path +
@@ -88,6 +88,8 @@ async function getSessionID() {
 async function serverRequest(url,api) {
 	console.log(`serverRequest(${url},${api})`);
 	let serverResponse;
+	
+	// check for server and connection errors
 	try {
 		const request = new Request(url);
 		serverResponse = await request.loadJSON();
@@ -95,7 +97,10 @@ async function serverRequest(url,api) {
 	catch (error) {
 		throw new fatalError(`serverResponse: ${JSON.stringify(error.message)}`);
 	}
+	
+	// check for server _response_ errors
 	if (serverResponse.success == true) {
+		console.log(`serverRequest() -> ${JSON.stringify(serverResponse)}`);
 		return serverResponse;
 	}
 	else {
@@ -141,7 +146,7 @@ function fatalError() {
 	Error.apply(this,arguments);
 	const errorText = arguments[0] ? arguments[0] : "";
 	this.name = errorText;
-	displayNotification("Download Station Error","",errorText);
+	displayNotification("❗️Download Station Error:","",errorText);
 }
 fatalError.prototype = Object.create(Error.prototype);
 
@@ -387,13 +392,8 @@ if (username && password) {
 	// called from share sheet
 	if (args.urls[0]) {
 		let url = args.urls[0];
-		let serverResponse = await addDownload(url);
-		if (serverResponse.success == true) {
-			displayNotification('Download Station','Success!',`\nAdded: ${url}`);
-		}
-		else {
-			displayNotification('Download Station','Failure!',`\nError: ${serverResponse}`);
-		}
+		await addDownload(url);
+		displayNotification("✅ Download Station Added:","",`📎 ${url}`);
 	}
 
 	// main
@@ -419,9 +419,8 @@ if (username && password) {
 	}
 }
 else {
-
 	// no login credentials!
-	displayNotification("Download Station Error","","No username or password set!");
+	throw new fatalError("No username or password set");
 }
 console.log("Script.complete()");
 Script.complete();
