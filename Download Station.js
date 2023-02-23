@@ -207,17 +207,7 @@ function createWidget(data,widgetSize) {
  	if (widgetSize == 'large' || widgetSize == 'medium') {
  	
 		let displayDownloads;
-		
-		if (widgetSize == 'large') {
-			displayDownloads = 6;
-		}
-		else if (widgetSize == 'medium') {
-			displayDownloads = 2;
-		}
- 	
-		// sort by percent completed % descending
-		data.sort((a, b) => { return b.percentComplete - a.percentComplete; });
- 	 	
+		 	 	
 		const widget = new ListWidget();
   
 		let verticalStack = widget.addStack();
@@ -238,7 +228,15 @@ function createWidget(data,widgetSize) {
 			headerIconElement.tintColor = Color.blue();
 
 		verticalStack.addSpacer(10);
+		 	
+			// sort by percent completed % descending
+			data.sort((a, b) => { return b.percentComplete - a.percentComplete; });
 
+			// trucate the list, large: 6, medium: 2
+			if (widgetSize == 'large') { displayDownloads = 6; }
+			else if (widgetSize == 'medium') { displayDownloads = 2; }
+
+			// slice extracts the first number of entries defined above
 			for (const i in data.slice(0,displayDownloads)) {
 
 				let titleStack = verticalStack.addStack();
