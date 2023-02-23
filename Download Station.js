@@ -30,88 +30,123 @@ let serverInfo = {};
 let sessionID = "";
 let numberOfDownloads = 0;
 
-async function serverRequest(url) {
-	try {
-		const request = new Request(url);
-		const serverResponse = await request.loadJSON();
-
-		if (serverResponse.success == true) {
-			console.log('serverRequest() -> success!');
-			return serverResponse;
-		}
-		else {
-			console.error(`serverRequest() -> error: ${JSON.stringify(serverResponse)}`);
-		}
-		
-	} catch (error) {
-		console.error(`serverRequest(${url}) -> error: ${JSON.stringify(error)}`);
-	}
-}
-
 async function getServerInfo() {
+	console.log("getServerInfo()");
+	const api = "SYNO.API.Info";
 	const path = "/webapi/query.cgi";
 	const url = server + path +
-		"?" + "api=SYNO.API.Info" +
+		"?" + "api=" + api +
 		"&" + "version=1" +
 		"&" + "method=query" +
 		"&" + "query=SYNO.API.Auth,SYNO.DownloadStation.Task";
-	return await serverRequest(url);
+	return await serverRequest(url,api);
+}
+
+async function getDownloads() {
+	console.log("getDownloads()");
+	const api = "SYNO.DownloadStation.Task";
+	const path = "/webapi/" + serverInfo.data[api].path;
+	const url = server + path +
+		"?" + "api=" + api +
+		"&" + "version=1" +
+		"&" + "method=list" +
+		"&" + "additional=transfer" +
+		"&" + "_sid=" + sessionID;
+	return await serverRequest(url,api);
+}
+
+async function addDownload(uri) {
+	console.log("addDownload()");
+	const api = "SYNO.DownloadStation.Task";
+	const path = "/webapi/" + serverInfo.data[api].path;
+	const url = server + path +
+		"?" + "api=" + api +
+		"&" + "version=2" +
+		"&" + "method=create" +
+		"&" + "uri=" + uri +
+		"&" + "username=" + username +
+		"&" + "password=" + password;
+	return await serverRequest(url,api);
 }
 
 async function getSessionID() {
-	const path = "/webapi/" + serverInfo.data["SYNO.API.Auth"].path;
+	console.log("getSessionID()");
+	const api = "SYNO.API.Auth";
+	const path = "/webapi/" + serverInfo.data[api].path;
 	const url = server + path +
-		"?" + "api=SYNO.API.Auth" +
+		"?" + "api=" + api +
 		"&" + "version=3" +
 		"&" + "method=login" +
 		"&" + "account=" + username +
 		"&" + "passwd=" + password +
 		"&" + "session=DownloadStation" +
 		"&" + "format=sid";
-	const serverResponse = await serverRequest(url);
+	const serverResponse = await serverRequest(url,api);
 	return serverResponse.data.sid;
 }
 
-async function getDownloads() {
-	const path = "/webapi/" + serverInfo.data["SYNO.DownloadStation.Task"].path;
-	const url = server + path +
-		"?" + "api=SYNO.DownloadStation.Task" +
-		"&" + "version=1" +
-		"&" + "method=list" +
-		"&" + "additional=transfer" +
-		"&" + "_sid=" + sessionID;
-	return await serverRequest(url);
+async function serverRequest(url,api) {
+	console.log(`serverRequest(${url},${api})`);
+	let serverResponse;
+	try {
+		const request = new Request(url);
+		serverResponse = await request.loadJSON();
+	}
+	catch (error) {
+		throw new fatalError(`serverResponse: ${JSON.stringify(error.message)}`);
+	}
+	if (serverResponse.success == true) {
+		return serverResponse;
+	}
+	else {
+		errorCode = serverResponse.error.code;
+		errorString = describeError(errorCode,api);
+		throw new fatalError(errorString);
+	}
 }
 
-async function addDownload(uri) {
-	const path = "/webapi/" + serverInfo.data["SYNO.DownloadStation.Task"].path;
-	const url = server + path +
-		"?" + "api=SYNO.DownloadStation.Task" +
-		"&" + "version=2" +
-		"&" + "method=create" +
-		"&" + "uri=" + uri +
-		"&" + "username=" + username +
-		"&" + "password=" + password;
-	return await serverRequest(url);
+function describeError(errorCode,api) {
+	console.log(`serverRequest(${errorCode},${api})`);
+	if (errorCode == "100") { return "Unknown error"; }
+	else if (errorCode == "101") { return "Invalid parameter"; }
+	else if (errorCode == "102") { return "The requested API does not exist"; }
+	else if (errorCode == "103") { return "The requested method does not exist"; }
+	else if (errorCode == "104") { return "The requested version does not support the functionality"; }
+	else if (errorCode == "105") { return "The logged in session does not have permission"; }
+	else if (errorCode == "106") { return "Session timeout"; }
+	else if (errorCode == "107") { return "Session interrupted by duplicate login"; }
+	if (api == "SYNO.API.Auth") {
+		if (errorCode == "400") { return "No such account or incorrect password"; }
+		else if (errorCode == "401") { return "Account disabled"; }
+		else if (errorCode == "402") { return "Permission denied"; }
+		else if (errorCode == "403") { return "2-step verification code required"; }
+		else if (errorCode == "404") { return "Failed to authenticate 2-step verification code"; }
+	}
+	else if (api == "SYNO.DownloadStation.Task") {
+		if (errorCode == "400") { return "File upload failed"; }
+		else if (errorCode == "401") { return "Max number of tasks reached"; }
+		else if (errorCode == "402") { return "Destination denied"; }
+		else if (errorCode == "403") { return "Destination does not exist"; }
+		else if (errorCode == "404") { return "Invalid task id"; }
+		else if (errorCode == "405") { return "Invalid task action"; }
+		else if (errorCode == "406") { return "No default destination"; }
+		else if (errorCode == "407") { return "Set destination failed"; }
+		else if (errorCode == "408") { return "File does not exist"; }
+	}
+	return "Unknown error code"; // catch all
 }
 
-// From: https://stackoverflow.com/a/14919494
-function humanFileSize(bytes, si=true, dp=1) {
-	const thresh = si ? 1000 : 1024;
-	if (Math.abs(bytes) < thresh) { return bytes + ' B'; }
-	const units = si
-		? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-		: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-	let u = -1;
-	const r = 10**dp;
-	do {
-		bytes /= thresh;
-		++u;
-	} while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-	return bytes.toFixed(dp) + ' ' + units[u];
+function fatalError() {
+	console.log("fatalError()");
+	Error.apply(this,arguments);
+	const errorText = arguments[0] ? arguments[0] : "";
+	this.name = errorText;
+	displayNotification("Download Station Error","",errorText);
 }
+fatalError.prototype = Object.create(Error.prototype);
 
 function processDownloadTasks(data) {
+	console.log(`processDownloadTasks(${data})`);
 	let tasks = [];
 	const truncate = 40; // default truncate at = 40
 	
@@ -149,7 +184,25 @@ function processDownloadTasks(data) {
 	return tasks;
 }
 
+// From: https://stackoverflow.com/a/14919494
+function humanFileSize(bytes, si=true, dp=1) {
+	console.log(`humanFileSize(${bytes})`);
+	const thresh = si ? 1000 : 1024;
+	if (Math.abs(bytes) < thresh) { return bytes + ' B'; }
+	const units = si
+		? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+		: ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+	let u = -1;
+	const r = 10**dp;
+	do {
+		bytes /= thresh;
+		++u;
+	} while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+	return bytes.toFixed(dp) + ' ' + units[u];
+}
+
 function createWidget(data,widgetSize) {
+	console.log(`createWidget(${data},${widgetSize})`);
  
  	if (widgetSize == 'large' || widgetSize == 'medium') {
  	
@@ -314,15 +367,21 @@ function createWidget(data,widgetSize) {
 }
 
 function displayNotification(title,subtitle,body) {
-	let n = new Notification();
-	n.title = title;
-	n.subtitle = subtitle;
-	n.body = body;
-	n.schedule();
+	console.log(`displayNotification(${title},${subtitle},${body})`);
+	Notification.removeAllDelivered();
+	Notification.removeAllPending();
+	
+	let notification = new Notification();
+	notification.threadIdentifier = "download-station-script";
+	notification.title = title;
+	notification.subtitle = subtitle;
+	notification.body = body;
+	notification.schedule();
 }
 
 if (username && password) {
-
+	console.log("main()");
+	
 	// populate variables
 	serverInfo = await getServerInfo();
 	sessionID = await getSessionID();
@@ -345,10 +404,8 @@ if (username && password) {
 		widgetSize = config.widgetFamily;
 		let rawJSON = await getDownloads();
 		numberOfDownloads = rawJSON.data.total;
-
 		let formattedJSON = processDownloadTasks(rawJSON.data.tasks);
 		let widget = createWidget(formattedJSON,widgetSize);
-  
 		Script.setWidget(widget);
 	}
 	else { // test in the app
@@ -356,17 +413,17 @@ if (username && password) {
 		widgetSize = 'large';
 		let rawJSON = await getDownloads();
 		numberOfDownloads = rawJSON.data.total;
-	
 		let formattedJSON = processDownloadTasks(rawJSON.data.tasks);
 		let widget = createWidget(formattedJSON,widgetSize);
-
 		if      (widgetSize == 'large')  { widget.presentLarge();  }
 		else if (widgetSize == 'medium') { widget.presentMedium(); }
 		else if (widgetSize == 'small')  { widget.presentSmall();  };
 	}
 }
 else {
+
 	// no login credentials!
-	displayNotification("Download Station.js Script Error","","No username or password set!");
+	displayNotification("Download Station Error","","No username or password set!");
 }
+console.log("Script.complete()");
 Script.complete();
